@@ -1,7 +1,7 @@
 {
   "name": "737 MAX 8-200 Brake Cooling",
   "short_name": "Brake Cooling",
-  "start_url": "./brake-cooling-737max8200.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#12161B",
   "theme_color": "#12161B",
