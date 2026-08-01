@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VAPP · Wind Additive</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#12161B">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12161B; --panel:#1B222A; --panel2:#232C36; --line:#2E3A46;
+  --txt:#E8EDF2; --dim:#8FA0B0; --grn:#4CE0A0; --amb:#FFB547; --red:#FF5A5A; --cyn:#57C7E3;
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.45;padding:14px 14px 40px;max-width:520px;margin:0 auto}
+h1{font:600 15px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+h1 b{color:var(--txt)}
+.sub{font-size:11px;color:var(--dim);letter-spacing:.06em;margin-top:2px}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+#gate .gbox{max-width:420px;background:var(--panel);border:1px solid var(--amb);border-radius:14px;padding:22px}
+#gate h2{font:600 13px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--amb);margin-bottom:12px}
+#gate p{font-size:14.5px;line-height:1.6;margin-bottom:10px}
+#gate p.small{font-size:12px;color:var(--dim)}
+#gate button{width:100%;margin-top:14px;background:var(--amb);color:#241A05;border:0;border-radius:8px;font:600 15px var(--sans);padding:13px;cursor:pointer}
+.summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.cells{display:flex;gap:10px}
+.cell{flex:1;background:var(--panel2);border-radius:9px;padding:10px 12px}
+.cell .lab{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.cell .val{font:500 30px/1.15 var(--mono);color:var(--grn)}
+.cell .val small{font-size:14px;color:var(--dim)}
+.cell.big .val{color:var(--cyn)}
+.addline{font:400 12px var(--mono);color:var(--dim);margin-top:8px}
+.comps{display:flex;gap:8px;margin-top:10px}
+.comp{flex:1;background:var(--panel2);border-radius:8px;padding:8px 10px;text-align:center}
+.comp .lab{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.comp .val{font:500 19px var(--mono);color:var(--txt)}
+.comp.tw .val{color:var(--amb)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.sname{font:600 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.row{display:flex;gap:10px;margin-bottom:10px}
+.field{flex:1}
+.field label{display:block;font-size:11px;letter-spacing:.06em;color:var(--dim);margin-bottom:4px}
+input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);font:500 18px var(--mono);padding:9px 10px;-moz-appearance:textfield}
+input:focus{outline:2px solid var(--cyn);outline-offset:1px;border-color:transparent}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+.note{font-size:12px;color:var(--dim);margin-top:8px}
+footer{font-size:11px;color:var(--dim);margin-top:18px;line-height:1.6}
+footer b{color:var(--amb)}
+</style>
+</head>
+<body>
+<div id="gate" role="alertdialog" aria-labelledby="gtitle" aria-describedby="gtext">
+  <div class="gbox">
+    <h2 id="gtitle">Training use only</h2>
+    <div id="gtext">
+      <p>This application is a personal study and training aid. It is <b>not approved for operational use</b> and must not be used in the aircraft or for flight planning.</p>
+      <p class="small">Refer to the QRH / FCOM and approved performance data. The approved data remains the sole authority.</p>
+    </div>
+    <button onclick="document.getElementById('gate').remove()">I acknowledge</button>
+  </div>
+</div>
+<h1><b>737 MAX 8</b> · VAPP / Wind Additive</h1>
+<div class="sub">Operator wind additive method · ½ steady headwind component + full gust increment</div>
+
+<div class="summary">
+  <div class="cells">
+    <div class="cell"><div class="lab">Wind additive</div><div class="val"><span id="addV">+5</span> <small>kt</small></div></div>
+    <div class="cell big"><div class="lab">VAPP</div><div class="val"><span id="vappV">—</span> <small>kt</small></div></div>
+    <div class="cell"><div class="lab">Temp</div><div class="val"><span id="tempF">59</span> <small>°F</small></div></div>
+  </div>
+  <div class="addline" id="addLine">Minimum additive +5</div>
+  <div class="comps">
+    <div class="comp"><div class="lab">Headwind</div><div class="val" id="hwV">0</div></div>
+    <div class="comp tw"><div class="lab">Tailwind</div><div class="val" id="twV">0</div></div>
+    <div class="comp"><div class="lab">Crosswind</div><div class="val" id="xwV">0</div></div>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="sname">Inputs</div>
+  <div class="row">
+    <div class="field"><label for="rwy">Runway (e.g. 27)</label><input id="rwy" type="number" inputmode="numeric" min="1" max="360"></div>
+    <div class="field"><label for="wdir">Wind direction · °</label><input id="wdir" type="number" inputmode="numeric" min="0" max="360"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label for="wspd">Wind speed · kt</label><input id="wspd" type="number" inputmode="numeric" min="0" value="0"></div>
+    <div class="field"><label for="wgst">Gust · kt</label><input id="wgst" type="number" inputmode="numeric" min="0"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label for="vref">Starting VREF · kt</label><input id="vref" type="number" inputmode="numeric" min="80"></div>
+    <div class="field"><label for="oatc">Temp · °C</label><input id="oatc" type="number" inputmode="decimal" value="15"></div>
+  </div>
+  <div class="note">Additive = ½ × steady headwind component + full gust increment above steady wind. Minimum +5, maximum +15. No additives for a steady tailwind component (including its gusts) — VREF + 5. If VREF + 15 exceeds landing flap placard speed − 5, use placard − 5.</div>
+</div>
+
+<footer>
+Personal planning aid using the operator wind additive method. <b>Cross-check against approved data and procedures — they remain the authority.</b>
+</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+function calc(){
+  const r=+$('rwy').value, wd=$('wdir').value===''?null:+$('wdir').value;
+  const ws=+$('wspd').value||0, wg=+$('wgst').value||0;
+  const vref=+$('vref').value||0, c=+$('oatc').value;
+  // temp
+  $('tempF').textContent=isNaN(c)?'—':Math.round(c*9/5+32);
+  // components
+  let hw=0,tw=0,xw=0,side='',comp=0,haveWind=false;
+  if(r&&wd!==null){
+    haveWind=true;
+    const hdg=r<=36?r*10:r;
+    const rad=(wd-hdg)*Math.PI/180;
+    comp=Math.cos(rad)*ws;
+    const cross=Math.sin(rad)*ws;
+    if(comp>=0)hw=Math.round(comp); else tw=Math.round(-comp);
+    xw=Math.round(Math.abs(cross));
+    side=cross>0.5?' R':(cross<-0.5?' L':'');
+    // crosswind with gust for reference
+    var xwG=Math.round(Math.abs(Math.sin(rad))*Math.max(ws,wg));
+  }
+  $('hwV').textContent=hw;
+  $('twV').textContent=tw;
+  $('xwV').textContent=xw+side+((typeof xwG!=='undefined'&&xwG>xw)?' (G'+xwG+')':'');
+  // additive per operator rule
+  let add, why;
+  const gustInc=Math.max(0,wg-ws);
+  if(!haveWind&&ws===0&&wg===0){add=5;why='Minimum additive +5';}
+  else if(haveWind&&comp<-0.001){add=5;why='Tailwind — no additives, VREF + 5';}
+  else{
+    const half=comp/2, raw=half+gustInc;
+    add=Math.min(15,Math.max(5,Math.round(raw)));
+    why='½ × '+Math.round(comp)+' HW = '+(Math.round(half*10)/10)+(gustInc?' · + gust increment '+gustInc:'')+
+        (raw<5?' → minimum +5':(raw>15?' → capped at +15':''));
+  }
+  $('addV').textContent='+'+add;
+  $('addLine').textContent=why;
+  $('vappV').textContent=vref?vref+add:'—';
+}
+['rwy','wdir','wspd','wgst','vref','oatc'].forEach(id=>$(id).addEventListener('input',calc));
+calc();
+</script>
+<script>
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
